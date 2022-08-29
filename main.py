@@ -4,48 +4,23 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import sqlalchemy
 import psycopg2
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, Sequence
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import text
+from sqlalchemy.orm import sessionmaker
+from models import User, Address, Base
 
-Base = declarative_base()
-engine = sqlalchemy.create_engine('postgresql://tegerte:start1@localhost:5432/db_test')
+engine = sqlalchemy.create_engine("postgresql://tegerte:start1@localhost:5432/db_test")
+
+
 Session = sessionmaker(bind=engine)
-session=Session()
+session = Session()
 
 
 # meta = MetaData()
 
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
-    name = Column(String(50))
-    fullname = Column(String(50))
-    nickname = Column(String(50))
-
-    def __repr__(self):
-        return "<User(name='%s', fullname='%s', nickname='%s')>" % (
-            self.name, self.fullname, self.nickname)
-
-
-class Address(Base):
-    __tablename__ = 'addresses'
-    id = Column(Integer, primary_key=True)
-    email_address = Column(String, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("User", back_populates="addresses")
-
-    def __repr__(self):
-        return "<Address(email_address='%s')>" % self.email_address
-
-
-User.addresses = relationship(
-    "Address", order_by=Address.id, back_populates="user")
-
 
 def create_tables(name):
     Base.metadata.create_all(engine)
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+    print(f"Hi, {name}")  # Press Ctrl+F8 to toggle the breakpoint.
 
 
 def create_user(name: str, fullname: str, nickname: str) -> str:
@@ -55,7 +30,21 @@ def create_user(name: str, fullname: str, nickname: str) -> str:
 
 
 # Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    create_user('ed','eddy egerter','bla')
-    create_tables('PyCharm')
+def list_users():
+    for instance in session.query(User).order_by(User.id):
+        print(instance.name, instance.fullname)
+
+
+def list_users_as_sql():
+    for instance in session.query().from_statement(text("Select * from users")):
+        print(instance)
+
+
+if __name__ == "__main__":
+    # create a nice user:
+    usr = create_user("ed", "eddy egerter", "bla")
+    print(f"Created user {usr}.")
+    create_tables("PyCharm")
     session.commit()
+    list_users()
+    list_users_as_sql()
