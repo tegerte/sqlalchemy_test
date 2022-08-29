@@ -7,5 +7,5 @@
 2. open console of postgres in Docker desktop
 2. open psql as postgres: `psql -U postgres;`
 3. create new database: `create database db_test;`
-4. new user tegerte: `create user tegerte with password 'start1';`
+4. new user tegerte: `create user tegerte with password '****';`
 5. grant usage to testuser tegerte: `grant all privileges on database "db_test" to tegerte;`
